@@ -142,14 +142,26 @@ function home(){
 }
 
 /* ---------- START SCREEN ---------- */
+let pickCount=null;   /* null = all questions */
+function setCount(qi,c){ pickCount=c; startScreen(qi); }
 function startScreen(qi){
   window.scrollTo(0,0);
   const q=QUIZZES[qi];
+  const total=q.questions.length;
+  const clin=q.questions.filter(x=>x.section==='B').length;
+  const gen=total-clin;
+  const allOn=(pickCount==null)||(pickCount>=total);
+  const chip=(label,val,on)=>`<button class="btn ${on?'btn-primary':'btn-ghost'}" style="padding:9px 16px;min-height:0;font-size:15px;flex:0 0 auto" onclick="setCount(${qi},${val})">${label}</button>`;
+  const chips=[10,20,30,40,50].filter(c=>c<total).map(c=>chip(c,c,!allOn&&pickCount===c)).join('')
+              +chip('הכל ('+total+')','null',allOn);
   app.innerHTML=`
     <button class="link" onclick="home()">‹ חזרה לרשימת הנושאים</button>
     <div class="card" style="margin-top:10px">
       <h2 style="margin:0 0 4px;font-size:22px">${esc(q.title)}</h2>
-      <p style="color:var(--muted);margin:0">${q.questions.length} שאלות · 30 כלליות + ${q.questions.filter(x=>x.section==='B').length} מבוססות מקרה קליני</p>
+      <p style="color:var(--muted);margin:0">${total} שאלות · ${gen} כלליות + ${clin} מבוססות מקרה קליני</p>
+      <p class="section-title" style="margin-top:20px">כמות שאלות</p>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">${chips}</div>
+      <p style="font-size:13px;color:var(--muted);margin:8px 2px 0">בבחירת כמות — השאלות נדגמות באקראי בכל כניסה, כולל מקרים קליניים משולבים.</p>
       <p class="section-title" style="margin-top:20px">איך תרצה/י לתרגל?</p>
       <div class="mode-row">
         <div class="mode-opt" onclick="beginQuiz(${qi},'practice')">
@@ -162,7 +174,7 @@ function startScreen(qi){
         </div>
       </div>
       <label style="display:flex;align-items:center;gap:8px;margin-top:18px;font-size:14px;color:var(--muted);cursor:pointer">
-        <input type="checkbox" id="shuffleChk" style="width:18px;height:18px"> ערבב/י את סדר השאלות
+        <input type="checkbox" id="shuffleChk" style="width:18px;height:18px"> ערבב/י את הסדר גם במצב "הכל"
       </label>
     </div>`;
 }
@@ -170,9 +182,12 @@ function startScreen(qi){
 /* ---------- QUIZ ENGINE ---------- */
 function beginQuiz(qi,mode){
   const q=QUIZZES[qi];
-  const doShuffle=document.getElementById("shuffleChk")?.checked;
-  let qs=q.questions.map((x,idx)=>({...x,_i:idx}));
-  if(doShuffle) qs=shuffle(qs.slice());
+  const total=q.questions.length;
+  const n=(pickCount==null)?total:Math.min(pickCount,total);
+  let pool=q.questions.map((x,idx)=>({...x,_i:idx}));
+  let qs;
+  if(n<total){ qs=shuffle(pool.slice()).slice(0,n); }
+  else { const doShuffle=document.getElementById("shuffleChk")?.checked; qs=doShuffle?shuffle(pool.slice()):pool; }
   state={qi,mode,quiz:q,qs,cur:0,answers:{},checked:{}};
   renderQuestion();
 }
