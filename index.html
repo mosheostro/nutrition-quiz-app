@@ -105,6 +105,14 @@ header.top .sub{font-size:13px;opacity:.85;margin-top:2px}
 .foot{text-align:center;color:var(--muted);font-size:12px;margin-top:30px;padding:0 16px calc(16px + env(safe-area-inset-bottom))}
 .link{background:none;border:none;color:var(--brand);font-weight:700;cursor:pointer;font-family:inherit;font-size:14px;padding:6px}
 .hidden{display:none}
+.exam-banner{background:linear-gradient(135deg,var(--brand),var(--brand-d));color:#fff;border-radius:18px;padding:20px;box-shadow:var(--shadow);margin-bottom:6px}
+.exam-banner .eb-top{display:flex;align-items:center;gap:12px}
+.exam-banner .eb-ic{font-size:28px;background:rgba(255,255,255,.16);width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.exam-banner h3{margin:0;font-size:19px;font-weight:800}
+.exam-banner p{margin:2px 0 0;font-size:13px;opacity:.92}
+.exam-banner .eb-btns{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.exam-banner .eb-btns .btn{flex:1 1 90px;background:#fff;color:var(--brand);min-height:46px;padding:10px 12px;font-size:16px}
+.exam-banner .eb-btns .btn:active{transform:scale(.98)}
 </style>
 </head>
 <body>
@@ -137,8 +145,28 @@ function home(){
       <p>${q.questions.length} שאלות · ${q.questions.filter(x=>x.section==='B').length} מקרים קליניים</p>
     </div>`).join("");
   app.innerHTML=`
-    <p class="section-title">בחר/י נושא לתרגול או לבחינה</p>
+    <div class="exam-banner">
+      <div class="eb-top"><span class="eb-ic">🎓</span>
+        <div><h3>מבחן מסכם</h3><p>שאלות אקראיות מכל הנושאים · כולל מקרים קליניים</p></div></div>
+      <div class="eb-btns">
+        <button class="btn" onclick="startCombinedExam(33)">33 שאלות</button>
+        <button class="btn" onclick="startCombinedExam(66)">66 שאלות</button>
+        <button class="btn" onclick="startCombinedExam(99)">99 שאלות</button>
+      </div>
+    </div>
+    <p class="section-title">או בחר/י נושא לתרגול או לבחינה</p>
     <div class="grid">${cards}</div>`;
+}
+
+/* ---------- COMBINED EXAM (all topics) ---------- */
+function startCombinedExam(n){
+  window.scrollTo(0,0);
+  let pool=[];
+  QUIZZES.forEach(q=>q.questions.forEach(x=>pool.push(Object.assign({},x,{_src:q.title}))));
+  n=Math.min(n,pool.length);
+  const qs=shuffle(pool.slice()).slice(0,n).map((x,i)=>Object.assign({},x,{_i:i}));
+  state={qi:-1,mode:'exam',quiz:{id:'EXAM',title:'מבחן מסכם — כל הנושאים',questions:qs},qs,cur:0,answers:{},checked:{}};
+  renderQuestion();
 }
 
 /* ---------- START SCREEN ---------- */
@@ -293,7 +321,7 @@ function scoreSoFar(){
 function countAnswered(){return Object.keys(state.answers).filter(k=>state.answers[k].length).length;}
 
 function confirmQuit(){
-  if(confirm("לצאת מהשאלון? ההתקדמות לא תישמר.")) startScreen(state.qi);
+  if(confirm("לצאת מהשאלון? ההתקדמות לא תישמר.")){ if(state.qi===-1) home(); else startScreen(state.qi); }
 }
 
 /* ---------- RESULTS ---------- */
@@ -319,6 +347,7 @@ function finish(){
       <div class="rdetail">
         ${r.ok?'':`<div>תשובתך: <span class="yourans">${yours}</span></div>`}
         <div>תשובה נכונה: <span class="rightans">${r.q.answer.join(", ")}</span></div>
+        ${r.q._src?`<div style="font-size:12px;color:var(--brand);font-weight:700;margin-top:4px">📚 ${esc(r.q._src)}</div>`:""}
         <div style="margin-top:6px">${esc(r.q.explanation)}</div>
         ${r.q.slides?`<div class="slides" style="margin-top:5px;color:var(--muted);font-size:12px">📎 שקופיות ${esc(r.q.slides)}</div>`:""}
       </div>
@@ -341,8 +370,11 @@ function finish(){
           <div><b>${total}</b><small>סה"כ</small></div></div>
       </div>
       <div class="nav">
-        <button class="btn btn-ghost" onclick="startScreen(${s.qi})">חזרה לנושא</button>
-        <button class="btn btn-primary" onclick="beginQuiz(${s.qi},'${s.mode}')">נסה/י שוב</button>
+        ${s.qi===-1
+          ? `<button class="btn btn-ghost" onclick="home()">לדף הבית</button>
+             <button class="btn btn-primary" onclick="startCombinedExam(${total})">מבחן מסכם חדש</button>`
+          : `<button class="btn btn-ghost" onclick="startScreen(${s.qi})">חזרה לנושא</button>
+             <button class="btn btn-primary" onclick="beginQuiz(${s.qi},'${s.mode}')">נסה/י שוב</button>`}
       </div>
     </div>
     <p class="section-title">סקירת תשובות</p>
