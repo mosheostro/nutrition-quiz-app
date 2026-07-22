@@ -117,6 +117,10 @@ header.top .sub{font-size:13px;opacity:.85;margin-top:2px}
 .btn-skip{background:#fef3c7;color:#92400e}
 .btn-skip:hover{background:#fde68a}
 .review-item.rskip{border-inline-start:5px solid var(--accent);background:#fffbeb}
+.review-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:26px}
+.wrong-toggle{display:flex;align-items:center;gap:7px;font-size:13.5px;color:var(--muted);cursor:pointer;font-weight:700;-webkit-user-select:none;user-select:none}
+.wrong-toggle input{width:18px;height:18px;accent-color:var(--bad)}
+#reviewList.only-wrong .review-item.rok,#reviewList.only-wrong .review-item.rskip{display:none}
 .stats.skip b{color:var(--accent)}
 .tlist{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 @media(max-width:560px){.tlist{grid-template-columns:1fr}}
@@ -459,8 +463,11 @@ function finish(){
              <button class="btn btn-primary" onclick="beginQuiz(${s.qi},'${s.mode}')">נסה/י שוב</button>`}
       </div>
     </div>
-    <p class="section-title">סקירת תשובות</p>
-    <div>${reviewHtml}</div>
+    <div class="review-head">
+      <p class="section-title" style="margin:0">סקירת תשובות</p>
+      ${(scored-correct)>0?`<label class="wrong-toggle"><input type="checkbox" onchange="document.getElementById('reviewList').classList.toggle('only-wrong', this.checked)"> הצג רק שגויות</label>`:''}
+    </div>
+    <div id="reviewList">${reviewHtml}</div>
     <div style="text-align:center;margin-top:20px"><button class="link" onclick="home()">↩ לכל הנושאים</button></div>`;
 }
 
