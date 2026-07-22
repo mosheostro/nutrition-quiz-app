@@ -1,7 +1,7 @@
 # שאלוני בחינה — תזונה (Nutrition Exam Quizzes)
 
 Interactive Hebrew (RTL) self-test app for 13 nutrition exam questionnaires
-(537 questions across topics).
+(618 questions incl. True/False).
 
 - **Practice mode** — instant feedback and explanation after each question.
 - **Exam mode** — answer everything, get a score and full review at the end.
