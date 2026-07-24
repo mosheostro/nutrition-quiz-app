@@ -1,7 +1,7 @@
 # שאלוני בחינה — תזונה (Nutrition Exam Quizzes)
 
 Interactive Hebrew (RTL) self-test app for 14 topics (13 subjects + final exam)
-(618 questions incl. True/False).
+(698 questions incl. True/False).
 
 - **Practice mode** — instant feedback and explanation after each question.
 - **Exam mode** — answer everything, get a score and full review at the end.
@@ -10,8 +10,9 @@ Interactive Hebrew (RTL) self-test app for 14 topics (13 subjects + final exam)
 
 ## Structure
 `index.html` — a single, self-contained static page. All quiz data is embedded
-(gzip + base64, decoded in the browser), so there are no external dependencies
-and it works offline.
+directly as inline JSON, so there are no external data dependencies and the
+app works offline (aside from the optional Google Fonts stylesheet, which
+falls back to a system font if unavailable).
 
 ## Deploy (Vercel)
 Static site, no build step. Import the repo in Vercel and deploy with defaults:
