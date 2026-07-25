@@ -185,7 +185,7 @@ function home(){
     </div>
     <p class="section-title">או בחר/י נושא לתרגול או לבחינה</p>
     <div class="grid">${cards}</div>
-    <div class="donate">💚 <b>אני מאמין בהחלפת אנרגיה.</b> אם האפליקציה והחומרים עוזרים לך — אפשר לומר תודה דרך <b>ביט</b>: <a href="tel:+972549989627">054-998-96-27</a></div>\n    <div class="about">ℹ️ נבנה באהבה על ידי <b>משה אוסטרובסקי</b> 💚<br>כשירות לתלמידי <b>רפואה תזונתית בשיטת הרמב\"ם</b><div class="ver">גרסה 2.0 · עודכן לאחרונה: 25/07/2026 18:55</div></div>`;
+    <div class="donate">💚 <b>אני מאמין בהחלפת אנרגיה.</b> אם האפליקציה והחומרים עוזרים לך — אפשר לומר תודה דרך <b>ביט</b>: <a href="tel:+972549989627">054-998-96-27</a></div>\n    <div class="about">ℹ️ נבנה באהבה על ידי <b>משה אוסטרובסקי</b> 💚<br>כשירות לתלמידי <b>רפואה תזונתית בשיטת הרמב\"ם</b><div class="ver">גרסה 2.0 · עודכן לאחרונה: 25/07/2026 19:10</div></div>`;
 }
 
 /* ---------- COMBINED EXAM (all topics) ---------- */
@@ -337,7 +337,8 @@ function renderQuestion(){
     </div>`;
   }
 
-  const liveScore=s.mode==='practice'?`<div class="score-live">ניקוד: ${scoreSoFar()} / ${Object.keys(s.checked).length}</div>`:`<div class="score-live">${countAnswered()} / ${total} נענו</div>`;
+  const _sc=scoreSoFar(), _an=Object.keys(s.checked).length, _pc=_an?Math.round(_sc/_an*100):0;
+  const liveScore=s.mode==='practice'?`<div class="score-live">ניקוד: ${_sc} / ${_an}${_an?` (${_pc}%)`:''}</div>`:`<div class="score-live">${countAnswered()} / ${total} נענו</div>`;
 
   let navBtns="";
   if(s.mode==='practice'){
