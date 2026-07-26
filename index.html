@@ -194,7 +194,7 @@ function home(){
     ${tfBanner}
     <p class="section-title">או בחר/י נושא לתרגול או לבחינה</p>
     <div class="grid">${cards}</div>
-    <div class="donate">💚 <b>אני מאמין בהחלפת אנרגיה.</b> אם האפליקציה והחומרים עוזרים לך — אפשר לומר תודה דרך <b>ביט</b>: <a href="tel:+972549989627">054-998-96-27</a></div>\n    <div class="about">ℹ️ נבנה באהבה על ידי <b>משה אוסטרובסקי</b> 💚<br>כשירות לתלמידי <b>רפואה תזונתית בשיטת הרמב\"ם</b><div class="ver">גרסה 2.0 · עודכן לאחרונה: 26/07/2026 12:18</div></div>`;
+    <div class="donate">💚 <b>אני מאמין בהחלפת אנרגיה.</b> אם האפליקציה והחומרים עוזרים לך — אפשר לומר תודה דרך <b>ביט</b>: <a href="tel:+972549989627">054-998-96-27</a></div>\n    <div class="about">ℹ️ נבנה באהבה על ידי <b>משה אוסטרובסקי</b> 💚<br>כשירות לתלמידי <b>רפואה תזונתית בשיטת הרמב\"ם</b><div class="ver">גרסה 2.0 · עודכן לאחרונה: 26/07/2026 15:16</div></div>`;
 }
 
 /* ---------- TRUE/FALSE GROUP (היגדים 18-29) ---------- */
@@ -209,10 +209,10 @@ function tfGroup(){
       <p>${q.questions.length} היגדים</p>
     </div>`).join("");
   const mixCards=mixed.map(({q,i})=>`
-    <div class="qz-card final-card" onclick="startScreen(${i})">
-      <span class="num">🔀 מעורב</span>
+    <div class="qz-card final-card" onclick="tfExamSetup()">
+      <span class="num">🔀 מעורב · מבחן</span>
       <h3>${esc(q.title)}</h3>
-      <p>${q.questions.length} היגדים מכל הנושאים</p>
+      <p>בחר/י נושאים וכמות · אפשר לדלג במצב מבחן</p>
     </div>`).join("");
   app.innerHTML=`
     <button class="link" onclick="home()">‹ חזרה לרשימת הנושאים</button>
@@ -223,6 +223,49 @@ function tfGroup(){
     ${mixCards?`<p class="section-title">תרגול מעורב</p><div class="grid">${mixCards}</div>`:''}
     <p class="section-title">לפי נושא</p>
     <div class="grid">${subCards}</div>`;
+}
+
+/* ---------- MIXED TRUE/FALSE EXAM (choose topics + count) ---------- */
+let tfCount=20, tfOff={};
+function tfAvail(){let n=0;QUIZZES.forEach((q,i)=>{if(q.group==='tf'&&!q.mixed&&!tfOff[i])n+=q.questions.length;});return n;}
+function toggleTfTopic(i){tfOff[i]=!tfOff[i];tfExamSetup();}
+function tfAllTopics(on){QUIZZES.forEach((q,i)=>{if(q.group==='tf'&&!q.mixed)tfOff[i]=!on;});tfExamSetup();}
+function setTfCount(n){tfCount=n;const el=document.getElementById('tfNum');if(el)el.textContent=n;}
+function pickTfCount(c){tfCount=c;tfExamSetup();}
+function tfExamSetup(){
+  window.scrollTo(0,0);
+  const avail=tfAvail();
+  const maxN=Math.max(10,Math.min(160,avail||10));
+  if(tfCount>maxN)tfCount=maxN;
+  const rows=QUIZZES.map((q,i)=>{if(q.group!=='tf'||q.mixed)return '';const on=!tfOff[i];
+    return `<label class="tpick ${on?'':'off'}"><input type="checkbox" ${on?'checked':''} onchange="toggleTfTopic(${i})"><span class="tp-t">${esc(q.title)}</span><span class="tp-c">${q.questions.length}</span></label>`;}).join('');
+  const chip=(c)=>`<button class="btn ${tfCount===c?'btn-primary':'btn-ghost'}" style="padding:8px 16px;min-height:0;flex:0 0 auto" onclick="pickTfCount(${c})">${c}</button>`;
+  app.innerHTML=`
+    <button class="link" onclick="tfGroup()">‹ חזרה</button>
+    <div class="card" style="margin-top:10px">
+      <h2 style="margin:0 0 2px;font-size:22px">מבחן נכון / לא נכון — מעורב</h2>
+      <p style="color:var(--muted);margin:0 0 14px">בחר/י נושאים וכמות · במצב מבחן אפשר לדלג על שאלות (דלג ⤼)</p>
+      <p class="section-title" style="margin-top:4px">נושאים לכלול</p>
+      <div style="display:flex;gap:10px;margin:4px 0 8px;font-size:13px">
+        <button class="link" style="padding:2px" onclick="tfAllTopics(true)">בחר/י הכל</button>
+        <button class="link" style="padding:2px" onclick="tfAllTopics(false)">נקה/י הכל</button></div>
+      <div class="tlist">${rows}</div>
+      <p class="section-title" style="margin-top:18px">מספר היגדים: <span id="tfNum" style="color:var(--brand);font-weight:800">${tfCount}</span> <span style="color:var(--muted);font-weight:400;font-size:13px">(זמינים: ${avail})</span></p>
+      <input type="range" min="10" max="${maxN}" value="${tfCount}" step="1" oninput="setTfCount(+this.value)" style="width:100%;accent-color:var(--brand);height:26px">
+      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">${chip(20)}${chip(40)}${chip(60)}</div>
+      <button class="btn btn-primary" style="width:100%;margin-top:20px" onclick="launchTfExam()">התחל מבחן</button>
+    </div>`;
+}
+function launchTfExam(){
+  const idxs=QUIZZES.map((q,i)=>i).filter(i=>QUIZZES[i].group==='tf'&&!QUIZZES[i].mixed&&!tfOff[i]);
+  if(!idxs.length){alert('יש לבחור לפחות נושא אחד');return;}
+  window.scrollTo(0,0);
+  let pool=[];
+  idxs.forEach(i=>QUIZZES[i].questions.forEach(x=>pool.push(Object.assign({},x,{_src:QUIZZES[i].title,_srcId:QUIZZES[i].id}))));
+  let n=Math.min(tfCount,pool.length);
+  const qs=shuffle(pool.slice()).slice(0,n).map((x,j)=>Object.assign({},x,{_i:j})).map(shuffleOpts);
+  state={qi:-1,mode:'exam',quiz:{id:'TFEXAM',title:'מבחן נכון / לא נכון',questions:qs},qs,cur:0,answers:{},checked:{},skipped:{}};
+  renderQuestion();
 }
 
 /* ---------- COMBINED EXAM (all topics) ---------- */
